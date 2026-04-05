@@ -1,0 +1,16 @@
+# Large data files
+Loan_Default.csv
+clean_loans.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+
+# Environment
+.env
+venv/
+.venv/
