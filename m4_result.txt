@@ -1,0 +1,175 @@
+
++========================================================+
+|  CreditPath AI - Milestone 4: Advanced Model Training  |
++========================================================+
+
+
+------------------------------------------------------------
+  STEP 1: Feature Engineering Pipeline (reusing Milestone 3)
+------------------------------------------------------------
+[LOAD] Dataset shape: (255347, 25)
+[ENGINEER] Shape after feature engineering: (255347, 29)
+[ENGINEER] New features: debt_to_income_score, loan_per_month, credit_income_ratio, high_risk_flag
+[SPLIT] Features: 28  |  Target: 'defaultstatus'  |  Rows: 255347
+[SPLIT] Train size: 204277  |  Test size: 51070
+[SPLIT] Default rate â€“ Train: 0.116  |  Test: 0.116
+[SCALE] Scaling complete â€“ 28 features scaled.
+
+------------------------------------------------------------
+  STEP 2: Training XGBoost & LightGBM (default params)
+------------------------------------------------------------
+[XGB] XGBoost training complete.
+[LGBM] LightGBM training complete.
+
+------------------------------------------------------------
+  STEP 3: Model Evaluation (AUC-ROC)
+------------------------------------------------------------
+
+  [XGBoost] AUC-ROC : 0.7561   [~]  Very Good  (>= 0.75)
+
+  Classification Report (XGBoost):
+
+              precision    recall  f1-score   support
+
+  No Default       0.94      0.70      0.81     45139
+     Default       0.23      0.68      0.34      5931
+
+    accuracy                           0.70     51070
+   macro avg       0.59      0.69      0.57     51070
+weighted avg       0.86      0.70      0.75     51070
+
+
+  [LightGBM] AUC-ROC : 0.7558   [~]  Very Good  (>= 0.75)
+
+  Classification Report (LightGBM):
+
+              precision    recall  f1-score   support
+
+  No Default       0.94      0.70      0.80     45139
+     Default       0.23      0.68      0.34      5931
+
+    accuracy                           0.70     51070
+   macro avg       0.59      0.69      0.57     51070
+weighted avg       0.86      0.70      0.75     51070
+
+
+------------------------------------------------------------
+  STEP 4: Hyperparameter Tuning
+------------------------------------------------------------
+
+  --- 4a. Grid Search ---
+
+  [TUNE] Running GridSearchCV on XGBoost (36 fits) â€¦
+Fitting 3 folds for each of 12 candidates, totalling 36 fits
+  [TUNE] Best params  : {'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 200}
+  [TUNE] Best CV AUC  : 0.7530
+
+  [XGB-GridSearch] AUC-ROC : 0.7586   [~]  Very Good  (>= 0.75)
+
+  Classification Report (XGB-GridSearch):
+
+              precision    recall  f1-score   support
+
+  No Default       0.94      0.69      0.80     45139
+     Default       0.23      0.69      0.34      5931
+
+    accuracy                           0.69     51070
+   macro avg       0.59      0.69      0.57     51070
+weighted avg       0.86      0.69      0.74     51070
+
+
+  --- 4b. Random Search (alternative, faster) ---
+
+  [TUNE] Running RandomizedSearchCV on XGBoost (60 fits) â€¦
+Fitting 3 folds for each of 20 candidates, totalling 60 fits
+  [TUNE] Best params  : {'colsample_bytree': np.float64(0.7123738038749523), 'learning_rate': np.float64(0.1131122558000672), 'max_depth': 3, 'n_estimators': 256, 'subsample': np.float64(0.9208787923016158)}
+  [TUNE] Best CV AUC  : 0.7529
+
+  [XGB-RandomSearch] AUC-ROC : 0.7585   [~]  Very Good  (>= 0.75)
+
+  Classification Report (XGB-RandomSearch):
+
+              precision    recall  f1-score   support
+
+  No Default       0.94      0.69      0.80     45139
+     Default       0.23      0.69      0.34      5931
+
+    accuracy                           0.69     51070
+   macro avg       0.59      0.69      0.57     51070
+weighted avg       0.86      0.69      0.75     51070
+
+
+  [TUNE] Winner: XGB-GridSearch  |  Test AUC: 0.7586
+
+------------------------------------------------------------
+  STEP 5: Feature Importance Analysis
+------------------------------------------------------------
+
+  [XGBoost] Top-10 Feature Importances:
+                     Feature  Importance
+                         age    0.155635
+                interestrate    0.083367
+                      income    0.066457
+              monthsemployed    0.053319
+             hascosigner_Yes    0.049870
+           hasdependents_Yes    0.048564
+   employmenttype_Unemployed    0.043324
+                  loanamount    0.038285
+             hasmortgage_Yes    0.033734
+employmenttype_Self-employed    0.031870
+
+  [LightGBM] Top-10 Feature Importances:
+             Feature  Importance
+        interestrate         637
+              income         627
+                 age         533
+      monthsemployed         511
+          loanamount         503
+         creditscore         456
+debt_to_income_score         413
+      loan_per_month         398
+ credit_income_ratio         390
+            dtiratio         335
+
+------------------------------------------------------------
+  STEP 6: Generating Diagnostic Plots
+------------------------------------------------------------
+  [PLOT] ROC comparison saved â†’ m4_roc_comparison.png
+  [PLOT] Feature importance saved â†’ m4_feature_importance.png
+  [PLOT] AUC comparison bar chart saved â†’ m4_auc_comparison.png
+  [PLOT] Confusion matrices saved â†’ m4_confusion_matrices.png
+
+------------------------------------------------------------
+  STEP 7: Final Summary
+------------------------------------------------------------
+
+  +======================================================+
+  |    CreditPath AI - Milestone 4 Results               |
+  +======================================================+
+  |  LR Baseline (M3)            AUC=0.7200  (+0.0000 vs LR)  |
+  |  XGBoost (default)           AUC=0.7561  (+0.0361 vs LR)  |
+  |  LightGBM (default)          AUC=0.7558  (+0.0358 vs LR)  |
+  |  XGB-GridSearch (tuned)      AUC=0.7586  (+0.0386 vs LR)  |
+  +======================================================+
+  |  Plots:                                              |
+  |    m4_roc_comparison.png                             |
+  |    m4_feature_importance.png                         |
+  |    m4_auc_comparison.png                             |
+  |    m4_confusion_matrices.png                         |
+  +======================================================+
+
+
+------------------------------------------------------------
+  Failure-Case Diagnosis
+------------------------------------------------------------
+  [OK] Models are performing well. No critical issues detected.
+
+  Common pitfalls and fixes:
+  +----------------------------------------------------------+
+  | High train AUC, low test AUC -> OVERFITTING              |
+  |   Fix: reduce max_depth, increase min_child_weight        |
+  | AUC not improving -> WEAK FEATURES                       |
+  |   Fix: revisit engineered features, add domain knowledge  |
+  | Very slow training -> TOO MANY ESTIMATORS                |
+  |   Fix: reduce n_estimators, use LightGBM instead         |
+  +----------------------------------------------------------+
