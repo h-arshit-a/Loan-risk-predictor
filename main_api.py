@@ -1,5 +1,5 @@
 """
-CreditPath AI – Milestone 5
+CreditPath AI
 FastAPI Prediction Service
 ──────────────────────────────────────────────────────────────────────────────
 ARCHITECTURE (per reference guide §2)
@@ -46,20 +46,21 @@ import numpy as np
 import joblib
 import os
 from typing import Optional
+from database import init_db, SessionLocal, PredictionRecord
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  1.  APP SETUP                                                           ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
 app = FastAPI(
-    title="CreditPath AI – Loan Default Predictor",
+    title="CreditPath AI – Loan Risk Intelligence",
     description=(
-        "## Milestone 5: Recommendation Engine & FastAPI\n\n"
+        "## Real-time Prediction Engine\n\n"
         "Send borrower profile → receive default probability, risk category, "
         "and a recommended collection action.\n\n"
         "**Risk thresholds**\n"
         "- `< 0.30` → Low Risk → Send Reminder\n"
-        "- `0.30 – 0.59` → Medium Risk → Call Customer\n"
+        "- `0.30 – 0.59` → Medium Risk → Send Alert Message\n"
         "- `≥ 0.60` → High Risk → Immediate Recovery Action\n"
     ),
     version="1.0.0",
@@ -74,6 +75,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize database on startup
+@app.on_event("startup")
+def on_startup():
+    try:
+        init_db()
+        print("[STARTUP] Database tables initialized.")
+    except Exception as e:
+        print(f"[STARTUP ERROR] Database initialization failed: {e}")
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -119,7 +129,7 @@ class LoanInput(BaseModel):
     All values must match the encoding used during training (clean_loans.csv).
     """
 
-    # ── Core numeric fields (matching milestone guide §7) ───────────────────
+    # ── Core numeric fields ───────────────────
     age:           int   = Field(..., ge=18, le=100,      example=40,
                                  description="Borrower age in years (18–100)")
     income:        float = Field(..., ge=0,               example=50000.0,
@@ -193,7 +203,7 @@ class LoanInput(BaseModel):
 # ║  4.  FEATURE ENGINEERING  (MUST match training pipeline)                 ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
-# ── Pre-scaling factors from original raw dataset (Milestone 2) ───────────
+# ── Pre-scaling factors from original raw dataset ───────────
 # data_cleaning.py scaled these 3 features before saving clean_loans.csv
 PRE_SCALE = {
     "income":       {"mean": 6957.34, "std": 6496.59},
@@ -283,19 +293,18 @@ def align_to_training_features(df: pd.DataFrame) -> pd.DataFrame:
 
 def recommend_action(prob: float) -> str:
     """
-    Rule-based recommendation engine (Milestone 5 §4).
+    Rule-based recommendation engine.
     Maps default probability to a concrete business action.
 
-    Thresholds (§3):
-      Note: XGBoost with `scale_pos_weight` artificially boosts probabilities
-      because it simulates a 50/50 balanced dataset. We adjust the "Low Risk" 
-      threshold upward from 0.30 to 0.48 so that Excellent profiles trigger it,
-      while preserving 0.60 as the High-Risk threshold.
+    Thresholds:
+      prob < 0.30  → Low Risk   → Send Reminder
+      0.30 – 0.59  → Medium Risk → Send Alert Message
+      prob ≥ 0.60  → High Risk  → Immediate Recovery Action
     """
-    if prob < 0.48:
+    if prob < 0.30:
         return "Low Risk - Send Reminder"
     elif prob < 0.60:
-        return "Medium Risk - Call Customer"
+        return "Medium Risk - Send Alert Message"
     else:
         return "High Risk - Immediate Recovery Action"
 
@@ -303,7 +312,7 @@ def recommend_action(prob: float) -> str:
 def risk_label(prob: float) -> str:
     if prob >= 0.60:
         return "High"
-    elif prob >= 0.48:
+    elif prob >= 0.30:
         return "Medium"
     return "Low"
 
@@ -316,7 +325,7 @@ def risk_label(prob: float) -> str:
 def root():
     """Health check / welcome endpoint."""
     return {
-        "service"   : "CreditPath AI – Milestone 5",
+        "service"   : "CreditPath AI – Risk Intelligence API",
         "status"    : "running",
         "model_loaded": MODEL is not None,
         "docs"      : "/docs",
@@ -343,14 +352,14 @@ def predict(data: LoanInput):
     """
     ## Predict Loan Default Probability
 
-    **Pipeline** (per Milestone 5 reference §2):
+    **Pipeline**:
     1. Validate input (Pydantic)
     2. Build raw DataFrame
-    3. Engineer derived features (same as training)
+    3. Engineer derived features
     4. One-hot encode categoricals
     5. Align column order to training feature set
     6. Scale using the saved StandardScaler
-    7. Predict probability with XGBoost
+    7. Predict probability
     8. Map to risk category + business action
 
     **Response fields**
@@ -392,7 +401,7 @@ def predict(data: LoanInput):
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Prediction error: {exc}")
 
-    return {
+    result = {
         "probability"  : round(prob, 4),
         "risk"         : risk,
         "action"       : action,
@@ -405,6 +414,26 @@ def predict(data: LoanInput):
             "dti_ratio"   : data.dti_ratio,
         },
     }
+
+    # Save to database
+    try:
+        db = SessionLocal()
+        record = PredictionRecord(
+            age=data.age,
+            income=data.income,
+            loan_amount=data.loan_amount,
+            credit_score=data.credit_score,
+            probability=prob,
+            risk_category=risk,
+            action=action
+        )
+        db.add(record)
+        db.commit()
+        db.close()
+    except Exception as e:
+        print(f"[DB ERROR] Failed to save prediction: {e}")
+
+    return result
 
 
 @app.post("/predict/batch", tags=["Prediction"])
@@ -455,7 +484,7 @@ def risk_thresholds():
         },
         "actions": {
             "Low"   : "Send Reminder",
-            "Medium": "Call Customer",
+            "Medium": "Send Alert Message",
             "High"  : "Immediate Recovery Action",
         },
         "note": (
