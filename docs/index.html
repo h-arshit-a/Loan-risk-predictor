@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreditPath AI – Loan Risk Predictor</title>
+  <meta name="description" content="CreditPath AI: Enter borrower details to instantly predict loan default probability, risk category, and recommended collection action." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ─── BACKGROUND ORBS ─────────────────────────────────── -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <!-- ─── HEADER ────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <div>
+          <span class="logo-title">CreditPath<span class="logo-accent">AI</span></span>
+          <span class="logo-sub">Loan Risk Intelligence Engine</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="api-badge" id="apiBadge">
+          <span class="dot"></span> Connecting…
+        </span>
+        <button id="themeToggle" class="btn-icon" aria-label="Toggle Theme" title="Toggle Light/Dark Mode">
+          <span class="icon-moon">🌙</span>
+          <span class="icon-sun hidden">☀️</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── HERO ──────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Predict Loan Default Risk <br /><span class="gradient-text">in Real Time</span></h1>
+      <p>Enter borrower profile details below. Our intelligent prediction engine instantly evaluates default probability and prescribes the right collection action.</p>
+    </div>
+  </section>
+
+  <!-- ─── MAIN LAYOUT ────────────────────────────────────────── -->
+  <main class="main-layout">
+
+    <!-- LEFT: INPUT FORM -->
+    <section class="card form-card">
+      <div class="card-header">
+        <span class="card-icon">📋</span>
+        <div>
+          <h2>Borrower Profile</h2>
+          <p>Fill all fields to generate a prediction</p>
+        </div>
+      </div>
+
+      <form id="loanForm" autocomplete="off">
+
+        <!-- SECTION: Core Financials -->
+        <div class="form-section">
+          <div class="section-label">Core Financials</div>
+          <div class="form-grid">
+
+            <div class="field" id="field-age">
+              <label for="age">Age <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">👤</span>
+                <input type="number" id="age" name="age" min="18" max="100" placeholder="e.g. 40" required />
+              </div>
+              <span class="hint">18 – 100 years</span>
+            </div>
+
+            <div class="field" id="field-income">
+              <label for="income">Annual Income (USD) <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">💵</span>
+                <input type="number" id="income" name="income" min="0" step="100" placeholder="e.g. 50000" required />
+              </div>
+              <span class="hint">Gross annual income</span>
+            </div>
+
+            <div class="field" id="field-loan_amount">
+              <label for="loan_amount">Loan Amount (USD) <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">🏦</span>
+                <input type="number" id="loan_amount" name="loan_amount" min="100" step="100" placeholder="e.g. 20000" required />
+              </div>
+              <span class="hint">Amount requested</span>
+            </div>
+
+            <div class="field" id="field-credit_score">
+              <label for="credit_score">Credit Score <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">⭐</span>
+                <input type="number" id="credit_score" name="credit_score" min="300" max="850" placeholder="e.g. 620" required />
+              </div>
+              <span class="hint">FICO score 300 – 850</span>
+            </div>
+
+            <div class="field" id="field-dti_ratio">
+              <label for="dti_ratio">DTI Ratio <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">📊</span>
+                <input type="number" id="dti_ratio" name="dti_ratio" min="0" max="1" step="0.01" placeholder="e.g. 0.35" required />
+              </div>
+              <span class="hint">Debt-to-income (0 – 1)</span>
+            </div>
+
+            <div class="field" id="field-interest_rate">
+              <label for="interest_rate">Interest Rate (%) <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">📈</span>
+                <input type="number" id="interest_rate" name="interest_rate" min="0" max="40" step="0.1" placeholder="e.g. 12.5" required />
+              </div>
+              <span class="hint">Annual rate 0 – 40%</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION: Loan Details -->
+        <div class="form-section">
+          <div class="section-label">Loan Details</div>
+          <div class="form-grid">
+
+            <div class="field" id="field-loan_term">
+              <label for="loan_term">Loan Term (months) <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">📅</span>
+                <input type="number" id="loan_term" name="loan_term" min="6" max="360" placeholder="e.g. 36" required />
+              </div>
+              <span class="hint">Duration in months</span>
+            </div>
+
+            <div class="field" id="field-months_employed">
+              <label for="months_employed">Months Employed <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">💼</span>
+                <input type="number" id="months_employed" name="months_employed" min="0" placeholder="e.g. 24" required />
+              </div>
+              <span class="hint">At current employer</span>
+            </div>
+
+            <div class="field" id="field-num_credit_lines">
+              <label for="num_credit_lines">Open Credit Lines <span class="required">*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">💳</span>
+                <input type="number" id="num_credit_lines" name="num_credit_lines" min="0" placeholder="e.g. 3" required />
+              </div>
+              <span class="hint">Number of open lines</span>
+            </div>
+
+            <div class="field" id="field-loan_purpose">
+              <label for="loan_purpose">Loan Purpose <span class="required">*</span></label>
+              <div class="input-wrap select-wrap">
+                <span class="input-icon">🎯</span>
+                <select id="loan_purpose" name="loan_purpose" required>
+                  <option value="">Select purpose…</option>
+                  <option value="Auto">Auto</option>
+                  <option value="Business">Business</option>
+                  <option value="Education" selected>Education</option>
+                  <option value="Home">Home</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION: Borrower Profile -->
+        <div class="form-section">
+          <div class="section-label">Borrower Profile</div>
+          <div class="form-grid">
+
+            <div class="field" id="field-employment_type">
+              <label for="employment_type">Employment Type <span class="required">*</span></label>
+              <div class="input-wrap select-wrap">
+                <span class="input-icon">🏢</span>
+                <select id="employment_type" name="employment_type" required>
+                  <option value="Full-time" selected>Full-time</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="Self-employed">Self-employed</option>
+                  <option value="Unemployed">Unemployed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field" id="field-education">
+              <label for="education">Education Level <span class="required">*</span></label>
+              <div class="input-wrap select-wrap">
+                <span class="input-icon">🎓</span>
+                <select id="education" name="education" required>
+                  <option value="Bachelor's" selected>Bachelor's</option>
+                  <option value="High School">High School</option>
+                  <option value="Master's">Master's</option>
+                  <option value="PhD">PhD</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field" id="field-marital_status">
+              <label for="marital_status">Marital Status <span class="required">*</span></label>
+              <div class="input-wrap select-wrap">
+                <span class="input-icon">💍</span>
+                <select id="marital_status" name="marital_status" required>
+                  <option value="Single" selected>Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Divorced">Divorced</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION: Boolean Flags (toggles) -->
+        <div class="form-section">
+          <div class="section-label">Additional Flags</div>
+          <div class="toggle-grid">
+
+            <div class="toggle-field" id="field-has_cosigner">
+              <span class="toggle-label">Has Co-signer?</span>
+              <label class="toggle">
+                <input type="checkbox" id="has_cosigner" name="has_cosigner" />
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-value" id="cosignerVal">No</span>
+            </div>
+
+            <div class="toggle-field" id="field-has_dependents">
+              <span class="toggle-label">Has Dependents?</span>
+              <label class="toggle">
+                <input type="checkbox" id="has_dependents" name="has_dependents" />
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-value" id="dependentsVal">No</span>
+            </div>
+
+            <div class="toggle-field" id="field-has_mortgage">
+              <span class="toggle-label">Has Mortgage?</span>
+              <label class="toggle">
+                <input type="checkbox" id="has_mortgage" name="has_mortgage" />
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-value" id="mortgageVal">No</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- QUICK FILL -->
+        <div class="quick-fill">
+          <span class="quick-label">Quick-fill demo:</span>
+          <button type="button" class="pill" onclick="fillDemo('low')">🟢 Low Risk</button>
+          <button type="button" class="pill" onclick="fillDemo('medium')">🟡 Medium Risk</button>
+          <button type="button" class="pill" onclick="fillDemo('high')">🔴 High Risk</button>
+          <button type="button" class="pill pill-clear" onclick="clearForm()">✕ Clear</button>
+        </div>
+
+        <button type="submit" class="btn-predict" id="predictBtn">
+          <span class="btn-text">Analyse Risk</span>
+          <span class="btn-arrow">→</span>
+        </button>
+
+      </form>
+    </section>
+
+    <!-- RIGHT: RESULTS PANEL -->
+    <section class="results-col">
+
+      <!-- Result Card -->
+      <div class="card result-card" id="resultCard">
+        <div class="result-placeholder" id="resultPlaceholder">
+          <div class="placeholder-icon">🔍</div>
+          <p>Fill in the borrower profile and click <strong>Analyse Risk</strong> to see the prediction here.</p>
+        </div>
+
+        <!-- Populated by JS -->
+        <div class="result-content hidden" id="resultContent">
+          <div class="result-header">
+            <div class="risk-badge" id="riskBadge"></div>
+            <div class="result-meta">
+              <span id="resultAction"></span>
+            </div>
+          </div>
+
+          <div class="prob-section">
+            <div class="prob-label">Default Probability</div>
+            <div class="prob-display">
+              <span class="prob-number" id="probNumber">0.00</span>
+              <span class="prob-pct">%</span>
+            </div>
+            <div class="prob-bar-wrap">
+              <div class="prob-bar-track">
+                <div class="prob-bar-fill" id="probBarFill"></div>
+                <div class="threshold-marker" style="left:30%"><span>30</span></div>
+                <div class="threshold-marker" style="left:60%"><span>60</span></div>
+              </div>
+              <div class="threshold-labels">
+                <span class="t-low">Low</span>
+                <span class="t-medium">Medium</span>
+                <span class="t-high">High</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-box" id="actionBox">
+            <div class="action-icon" id="actionIcon"></div>
+            <div>
+              <div class="action-title">Recommended Action</div>
+              <div class="action-detail" id="actionDetail"></div>
+            </div>
+          </div>
+
+          <div class="input-summary" id="inputSummary"></div>
+
+
+        </div>
+
+        <!-- Loading state -->
+        <div class="result-loading hidden" id="resultLoading">
+          <div class="spinner"></div>
+          <p>Running prediction pipeline…</p>
+        </div>
+
+        <!-- Error state -->
+        <div class="result-error hidden" id="resultError">
+          <div class="error-icon">⚠️</div>
+          <p id="errorMsg"></p>
+        </div>
+      </div>
+
+      <!-- History Card -->
+      <div class="card history-card" id="historyCard">
+        <div class="card-header">
+          <span class="card-icon">🕑</span>
+          <div>
+            <h2>Prediction History</h2>
+            <p id="historyCount">No predictions yet</p>
+          </div>
+          <button class="btn-ghost" id="clearHistoryBtn" onclick="clearHistory()">Clear</button>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">Your past predictions will appear here.</div>
+        </div>
+      </div>
+
+      <!-- Risk Scale Info Card -->
+      <div class="card info-card">
+        <div class="card-header">
+          <span class="card-icon">📖</span>
+          <div>
+            <h2>Risk Scale Reference</h2>
+            <p>How predictions map to actions</p>
+          </div>
+        </div>
+        <div class="risk-scale">
+          <div class="scale-row scale-low">
+            <div class="scale-chip">LOW</div>
+            <div class="scale-prob">Prob &lt; 0.30</div>
+            <div class="scale-action">📧 Send Payment Reminder</div>
+          </div>
+          <div class="scale-row scale-medium">
+            <div class="scale-chip">MEDIUM</div>
+            <div class="scale-prob">0.30 – 0.59</div>
+            <div class="scale-action">⚠️ Send Alert Message</div>
+          </div>
+          <div class="scale-row scale-high">
+            <div class="scale-chip">HIGH</div>
+            <div class="scale-prob">Prob ≥ 0.60</div>
+            <div class="scale-action">🚨 Immediate Recovery Action</div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>CreditPath <strong>AI</strong> © 2026</span>
+      <span class="footer-sep">·</span>
+      <span>Risk Intelligence Engine</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
