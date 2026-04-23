@@ -1,5 +1,5 @@
 /* ── GLOBALS ─────────────────────────────────────────────── */
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = 'https://loan-risk-predictor.onrender.com';
 let predictionHistory = [];
 
 /* ── DOM REFS ────────────────────────────────────────────── */
