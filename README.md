@@ -1,5 +1,8 @@
 # AI CreditPath – Data Cleaning & EDA Pipeline
 
+## Dataset
+You can download the raw dataset from here:
+[Loan Default Dataset (Google Drive)](https://drive.google.com/file/d/1T-W_6vH3EQ_Y6NkVeMsb6gYmsHdRJJ0e/view?usp=drive_link)
 This repository contains the **Milestone 2** work for the AI CreditPath project: a modular Python pipeline that connects to a PostgreSQL database, cleans the loan default dataset, performs exploratory data analysis, and exports a clean CSV ready for machine learning.
 
 ---
